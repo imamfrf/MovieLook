@@ -8,13 +8,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.imamfrf.movielook.R
 import com.imamfrf.movielook.data.model.Cast
 import com.imamfrf.movielook.data.model.Movie
+import com.imamfrf.movielook.utils.Constants.URL_GET_IMAGE
 import com.imamfrf.movielook.utils.ViewModelFactory
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
@@ -52,7 +53,7 @@ class DetailActivity : AppCompatActivity() {
     private fun obtainViewModel(activity: FragmentActivity): DetailViewModel {
         // Use a Factory to inject dependencies into the ViewModel
         val factory = ViewModelFactory.getInstance(activity.application)
-        return ViewModelProviders.of(activity, factory).get(DetailViewModel::class.java)
+        return ViewModelProvider(activity, factory).get(DetailViewModel::class.java)
     }
 
     private fun subscribeMovieDetail() {
@@ -61,6 +62,7 @@ class DetailActivity : AppCompatActivity() {
             movie = it
             subscribeMovieCredits()
         }
+
         viewModel.getMovieDetails(movieId).observe(this, movieObserver)
     }
 
@@ -75,15 +77,23 @@ class DetailActivity : AppCompatActivity() {
     private fun subscribeMovieTrailer() {
         val movieObserver = Observer<Movie> {
             movie = it
-            showDetails()
+            setupUI()
         }
         viewModel.getMovieTrailer(movie).observe(this, movieObserver)
     }
 
-    private fun showDetails() {
-        Glide.with(this).load("https://image.tmdb.org/t/p/w342" + movie.backdrop)
+    private fun setupUI() {
+        showMovieDetails()
+        showMovieCast()
+        showTrailer()
+        updateFavoriteButton()
+        progress_bar_detail.hide()
+    }
+
+    private fun showMovieDetails() {
+        Glide.with(this).load(URL_GET_IMAGE + movie.backdrop)
             .into(image_backdrop)
-        Glide.with(this).load("https://image.tmdb.org/t/p/w342" + movie.poster)
+        Glide.with(this).load(URL_GET_IMAGE + movie.poster)
             .into(image_poster_detail)
         text_rating_value.text = "${movie.score}/10"
         text_release_date_value.text = movie.releaseDate
@@ -91,6 +101,9 @@ class DetailActivity : AppCompatActivity() {
         text_title.text = movie.title
         text_genre_value.text = movie.genre
         text_director_value.text = movie.director
+    }
+
+    private fun showMovieCast() {
         val castList = arrayListOf<Cast>()
         castList.addAll(movie.casts)
         castAdapter = CastAdapter(castList)
@@ -99,6 +112,9 @@ class DetailActivity : AppCompatActivity() {
             layoutManager = LinearLayoutManager(this@DetailActivity, RecyclerView.HORIZONTAL, false)
             adapter = castAdapter
         }
+    }
+
+    private fun showTrailer() {
         if (movie.trailerVideoId != "null") {
             youtube_player_view.addYouTubePlayerListener(object : AbstractYouTubePlayerListener() {
                 override fun onReady(youTubePlayer: YouTubePlayer) {
@@ -109,24 +125,9 @@ class DetailActivity : AppCompatActivity() {
             text_trailer_title.visibility = View.GONE
             youtube_player_view.visibility = View.GONE
         }
-
-        updateButton()
-
-        progress_bar_detail.hide()
     }
 
-    private fun isFavorited(): Boolean {
-        var movieList = listOf<Movie>()
-        runBlocking {
-            movieList = viewModel.getFavoriteMovie(movieId)
-        }
-        if (movieList.isNotEmpty()) {
-            return true
-        }
-        return false
-    }
-
-    private fun updateButton() {
+    private fun updateFavoriteButton() {
         if (isFavorited()) {
             button_favorite.setText(R.string.remove_from_favorite)
             button_favorite.setCompoundDrawablesWithIntrinsicBounds(
@@ -140,8 +141,9 @@ class DetailActivity : AppCompatActivity() {
                 runBlocking {
                     viewModel.deleteFromFavorite(movie)
                 }
-                Toast.makeText(this, "Removed from favorite", Toast.LENGTH_SHORT).show()
-                updateButton()
+                Toast.makeText(this, getString(R.string.removed_from_favorite), Toast.LENGTH_SHORT)
+                    .show()
+                updateFavoriteButton()
             }
         } else {
             button_favorite.setText(R.string.add_to_favorite)
@@ -156,11 +158,23 @@ class DetailActivity : AppCompatActivity() {
                 runBlocking {
                     viewModel.addToFavorite(movie)
                 }
-                Toast.makeText(this, "Added to favorite", Toast.LENGTH_SHORT).show()
-                updateButton()
+                Toast.makeText(this, getString(R.string.added_to_favorite), Toast.LENGTH_SHORT)
+                    .show()
+                updateFavoriteButton()
             }
 
         }
+    }
+
+    private fun isFavorited(): Boolean {
+        var movieList = listOf<Movie>()
+        runBlocking {
+            movieList = viewModel.getFavoriteMovie(movieId)
+        }
+        if (movieList.isNotEmpty()) {
+            return true
+        }
+        return false
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

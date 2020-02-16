@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -46,7 +47,7 @@ class FavoriteFragment : Fragment(), MainListener {
     private fun obtainViewModel(activity: FragmentActivity): MainViewModel {
         // Use a Factory to inject dependencies into the ViewModel
         val factory = ViewModelFactory.getInstance(activity.application)
-        return ViewModelProviders.of(activity, factory).get(MainViewModel::class.java)
+        return ViewModelProvider(this, factory).get(MainViewModel::class.java)
     }
 
     private fun setupUI() {
@@ -58,16 +59,20 @@ class FavoriteFragment : Fragment(), MainListener {
         val movieObserver = Observer<List<Movie>> {
             val movies = arrayListOf<Movie>()
             movies.addAll(it)
-            favoriteAdapter = MainAdapter(movies, this)
-            favoriteAdapter.notifyDataSetChanged()
-            layout_favorite.recycler_movie_card.apply {
-                layoutManager = GridLayoutManager(context, 2, RecyclerView.VERTICAL, false)
-                adapter = favoriteAdapter
-            }
+            showFavoriteList(movies)
             layout_favorite.progress_bar_home.hide()
         }
 
         viewModel.favoritesMovie.observe(viewLifecycleOwner, movieObserver)
+    }
+
+    private fun showFavoriteList(movies: ArrayList<Movie>){
+        favoriteAdapter = MainAdapter(movies, this)
+        favoriteAdapter.notifyDataSetChanged()
+        layout_favorite.recycler_movie_card.apply {
+            layoutManager = GridLayoutManager(context, 2, RecyclerView.VERTICAL, false)
+            adapter = favoriteAdapter
+        }
     }
 
     override fun onItemClick(movie: Movie) {

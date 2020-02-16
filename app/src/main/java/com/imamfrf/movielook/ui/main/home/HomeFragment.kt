@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -50,7 +51,7 @@ class HomeFragment : Fragment(),
     private fun obtainViewModel(activity: FragmentActivity): MainViewModel {
         // Use a Factory to inject dependencies into the ViewModel
         val factory = ViewModelFactory.getInstance(activity.application)
-        return ViewModelProviders.of(activity, factory).get(MainViewModel::class.java)
+        return ViewModelProvider(activity, factory).get(MainViewModel::class.java)
     }
 
     private fun setupUI(){
@@ -63,12 +64,7 @@ class HomeFragment : Fragment(),
         val movieObserver = Observer<List<Movie>>{
             val movies = arrayListOf<Movie>()
             movies.addAll(it)
-            nowPlayingAdapter = MainAdapter(movies, this)
-            nowPlayingAdapter.notifyDataSetChanged()
-            layout_now_playing.recycler_movie_card.apply {
-                layoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
-                adapter = nowPlayingAdapter
-            }
+            showNowPlayingList(movies)
             layout_now_playing.progress_bar_home.hide()
         }
 
@@ -80,16 +76,29 @@ class HomeFragment : Fragment(),
         val movieObserver = Observer<List<Movie>>{
             val movies = arrayListOf<Movie>()
             movies.addAll(it)
-            popularAdapter = MainAdapter(movies, this)
-            popularAdapter.notifyDataSetChanged()
-            layout_popular_movie.recycler_movie_card.apply {
-                layoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
-                adapter = popularAdapter
-            }
+            showPopularList(movies)
             layout_popular_movie.progress_bar_home.hide()
         }
 
         viewModel.popularMovie.observe(viewLifecycleOwner, movieObserver)
+    }
+
+    private fun showNowPlayingList(movies: ArrayList<Movie>){
+        nowPlayingAdapter = MainAdapter(movies, this)
+        nowPlayingAdapter.notifyDataSetChanged()
+        layout_now_playing.recycler_movie_card.apply {
+            layoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
+            adapter = nowPlayingAdapter
+        }
+    }
+
+    private fun showPopularList(movies: ArrayList<Movie>){
+        popularAdapter = MainAdapter(movies, this)
+        popularAdapter.notifyDataSetChanged()
+        layout_popular_movie.recycler_movie_card.apply {
+            layoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
+            adapter = popularAdapter
+        }
     }
 
     override fun onItemClick(movie: Movie) {

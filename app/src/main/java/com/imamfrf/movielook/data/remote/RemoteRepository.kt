@@ -94,6 +94,7 @@ class RemoteRepository(private val application: Application) {
     }
 
     fun getMovieDetails(id: String, callback: GetMovieDetailsCallback) {
+
         AndroidNetworking.get("$URL_GET_MOVIE/$id")
             .addQueryParameter("api_key", API_KEY)
             .setPriority(Priority.HIGH)
@@ -149,13 +150,13 @@ class RemoteRepository(private val application: Application) {
             .getAsJSONObject(object : JSONObjectRequestListener {
                 override fun onResponse(response: JSONObject?) {
                     val resultsArray = response?.getJSONArray("results")
-                    if (resultsArray!!.length() > 0){
+                    if (resultsArray!!.length() > 0) {
                         movie.trailerVideoId = resultsArray.getJSONObject(0)!!.getString("key")
-                        callback.onSuccess(movie)
-                    }
-                    else{
+                    } else {
                         movie.trailerVideoId = "null"
                     }
+                    callback.onSuccess(movie)
+
 
                 }
 
