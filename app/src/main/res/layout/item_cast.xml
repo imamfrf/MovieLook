@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/image_cast"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:src="@color/colorAccent"
+        app:civ_border_width="2dp"
+        app:civ_border_color="@color/colorAccent"
+        />
+    <TextView
+        android:id="@+id/text_cast_name"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="@id/image_cast"
+        app:layout_constraintTop_toBottomOf="@id/image_cast"
+        app:layout_constraintEnd_toEndOf="@id/image_cast"
+        tools:text="Will Smith"
+        android:textAlignment="center"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+        />
+    <TextView
+        android:id="@+id/text_cast_character"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="@id/image_cast"
+        app:layout_constraintTop_toBottomOf="@id/text_cast_name"
+        app:layout_constraintEnd_toEndOf="@id/image_cast"
+        tools:text="Michael"
+        android:textAlignment="center"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle2"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
